@@ -1,7 +1,7 @@
 import pkg from '../package.json'
 
 const version = `v${pkg.version}`
-const name = 'gh-review-comment'
+const name = pkg.name
 
 const targets = [
   { target: 'bun-darwin-x64',   output: `${name}-darwin-amd64` },
