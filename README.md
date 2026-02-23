@@ -49,16 +49,16 @@ gh review-comment list [<pr>] [flags]
 
 **Arguments**
 
-| Argument | Description |
-| :--- | :--- |
-| `<pr>` | Pull request number (defaults to the PR associated with the current branch) |
+| Argument | Description                                                                 |
+| :------- | :-------------------------------------------------------------------------- |
+| `<pr>`   | Pull request number (defaults to the PR associated with the current branch) |
 
 **Flags**
 
-| Flag | Description |
-| :--- | :--- |
+| Flag           | Description                                             |
+| :------------- | :------------------------------------------------------ |
 | `-R`, `--repo` | Select another repository using the `OWNER/REPO` format |
-| `--json` | Output raw JSON |
+| `--json`       | Output raw JSON                                         |
 
 ### `reply`
 
@@ -70,15 +70,15 @@ gh review-comment reply <commentId> [flags]
 
 **Arguments**
 
-| Argument | Description |
-| :--- | :--- |
+| Argument      | Description                          |
+| :------------ | :----------------------------------- |
 | `<commentId>` | Review comment database ID (numeric) |
 
 **Flags**
 
-| Flag | Description |
-| :--- | :--- |
-| `-b`, `--body` | Reply body text (required) |
+| Flag           | Description                                             |
+| :------------- | :------------------------------------------------------ |
+| `-b`, `--body` | Reply body text (required)                              |
 | `-R`, `--repo` | Select another repository using the `OWNER/REPO` format |
 
 ### `resolve`
@@ -91,8 +91,8 @@ gh review-comment resolve <threadId>
 
 **Arguments**
 
-| Argument | Description |
-| :--- | :--- |
+| Argument     | Description                            |
+| :----------- | :------------------------------------- |
 | `<threadId>` | Review thread ID (starts with `PRRT_`) |
 
 ### `unresolve`
@@ -105,8 +105,8 @@ gh review-comment unresolve <threadId>
 
 **Arguments**
 
-| Argument | Description |
-| :--- | :--- |
+| Argument     | Description                            |
+| :----------- | :------------------------------------- |
 | `<threadId>` | Review thread ID (starts with `PRRT_`) |
 
 ## Development
