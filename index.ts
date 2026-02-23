@@ -99,6 +99,11 @@ const replyCommand = define({
   run: async (ctx) => {
     const { commentId, body } = ctx.values
 
+    if (!commentId) {
+      console.error('Error: commentId is required')
+      process.exit(1)
+    }
+
     if (!body) {
       console.error('Error: --body is required')
       process.exit(1)
