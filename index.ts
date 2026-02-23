@@ -125,15 +125,11 @@ const replyCommand = define({
     repo: {
       type: 'string',
       short: 'R',
-      description: 'Select another repository using the [HOST/]OWNER/REPO format',
-    },
-    pr: {
-      type: 'string',
-      description: 'Pull request number',
+      description: 'Select another repository using the OWNER/REPO format',
     },
   },
   run: async (ctx) => {
-    const { commentId, body, repo, pr } = ctx.values
+    const { commentId, body, repo } = ctx.values
 
     if (!commentId) {
       console.error('Error: commentId is required')
@@ -155,23 +151,25 @@ const replyCommand = define({
       repoFullName = new TextDecoder().decode(repoResult.stdout).trim()
     }
 
-    let prNumber = pr
-    if (!prNumber) {
-      const prResult = Bun.spawnSync(['gh', 'pr', 'view', '--repo', repoFullName, '--json', 'number', '-q', '.number'])
-      if (prResult.exitCode !== 0) {
-        console.error(new TextDecoder().decode(prResult.stderr).trim())
-        process.exit(1)
-      }
-      prNumber = new TextDecoder().decode(prResult.stdout).trim()
-    }
-
     const parts = repoFullName.split('/').filter(Boolean)
     if (parts.length < 2) {
-      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO" or "HOST/OWNER/REPO".`)
+      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO".`)
       process.exit(1)
     }
     const owner = parts[parts.length - 2]
     const repoName = parts[parts.length - 1]
+
+    const commentResult = Bun.spawnSync([
+      'gh', 'api',
+      `/repos/${owner}/${repoName}/pulls/comments/${commentId}`,
+      '-q', '.pull_request_url',
+    ])
+    if (commentResult.exitCode !== 0) {
+      console.error(new TextDecoder().decode(commentResult.stderr).trim())
+      process.exit(1)
+    }
+    const pullRequestUrl = new TextDecoder().decode(commentResult.stdout).trim()
+    const prNumber = pullRequestUrl.split('/').pop()
 
     const result = Bun.spawnSync([
       'gh', 'api',
@@ -279,7 +277,7 @@ const listCommand = define({
     repo: {
       type: 'string',
       short: 'R',
-      description: 'Select another repository using the [HOST/]OWNER/REPO format',
+      description: 'Select another repository using the OWNER/REPO format',
     },
     json: {
       type: 'boolean',
@@ -311,7 +309,7 @@ const listCommand = define({
 
     const parts = repoFullName.split('/').filter(Boolean)
     if (parts.length < 2) {
-      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO" or "HOST/OWNER/REPO".`)
+      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO".`)
       process.exit(1)
     }
     const owner = parts[parts.length - 2]
