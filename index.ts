@@ -189,7 +189,7 @@ const resolveCommand = define({
       process.exit(1)
     }
 
-    console.log(thread.id)
+    console.log(`✓ Resolved review thread ${thread.id}`)
   },
 })
 
