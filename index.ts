@@ -150,7 +150,7 @@ const replyCommand = define({
       process.exit(1)
     }
 
-    console.log(comment.url)
+    console.log(`✓ Replied to comment ${comment.url}`)
   },
 })
 
