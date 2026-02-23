@@ -80,22 +80,22 @@ const listCommand = define({
 
     let repoFullName = repo
     if (!repoFullName) {
-      const result = Bun.spawnSync(['gh', 'repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'])
-      if (result.exitCode !== 0) {
-        console.error(new TextDecoder().decode(result.stderr).trim())
+      const repoResult = Bun.spawnSync(['gh', 'repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'])
+      if (repoResult.exitCode !== 0) {
+        console.error(new TextDecoder().decode(repoResult.stderr).trim())
         process.exit(1)
       }
-      repoFullName = new TextDecoder().decode(result.stdout).trim()
+      repoFullName = new TextDecoder().decode(repoResult.stdout).trim()
     }
 
     let prNumber = pr
     if (!prNumber) {
-      const result = Bun.spawnSync(['gh', 'pr', 'view', '--json', 'number', '-q', '.number'])
-      if (result.exitCode !== 0) {
-        console.error(new TextDecoder().decode(result.stderr).trim())
+      const prResult = Bun.spawnSync(['gh', 'pr', 'view', '--json', 'number', '-q', '.number'])
+      if (prResult.exitCode !== 0) {
+        console.error(new TextDecoder().decode(prResult.stderr).trim())
         process.exit(1)
       }
-      prNumber = new TextDecoder().decode(result.stdout).trim()
+      prNumber = new TextDecoder().decode(prResult.stdout).trim()
     }
 
     const parts = repoFullName.split('/').filter(Boolean)
@@ -106,19 +106,19 @@ const listCommand = define({
     const owner = parts[parts.length - 2]
     const repoName = parts[parts.length - 1]
 
-    const result = Bun.spawnSync([
+    const graphqlResult = Bun.spawnSync([
       'gh', 'api', 'graphql',
       '-f', `query=${REVIEW_THREADS_QUERY}`,
       '-f', `owner=${owner}`,
       '-f', `repo=${repoName}`,
       '-F', `pr=${prNumber}`,
     ])
-    if (result.exitCode !== 0) {
-      console.error(new TextDecoder().decode(result.stderr).trim())
+    if (graphqlResult.exitCode !== 0) {
+      console.error(new TextDecoder().decode(graphqlResult.stderr).trim())
       process.exit(1)
     }
 
-    const raw = new TextDecoder().decode(result.stdout)
+    const raw = new TextDecoder().decode(graphqlResult.stdout)
 
     if (json) {
       console.log(raw)
