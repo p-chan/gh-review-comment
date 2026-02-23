@@ -87,6 +87,28 @@ type ResolveResponse = {
   }
 }
 
+const UNRESOLVE_MUTATION = `
+  mutation($threadId: ID!) {
+    unresolveReviewThread(input: { threadId: $threadId }) {
+      thread {
+        id
+        isResolved
+      }
+    }
+  }
+`
+
+type UnresolveResponse = {
+  data: {
+    unresolveReviewThread: {
+      thread: {
+        id: string
+        isResolved: boolean
+      }
+    } | null
+  }
+}
+
 const replyCommand = define({
   name: 'reply',
   description: 'Reply to a review comment',
@@ -207,6 +229,45 @@ const resolveCommand = define({
   },
 })
 
+const unresolveCommand = define({
+  name: 'unresolve',
+  description: 'Unresolve a review thread',
+  args: {
+    threadId: {
+      type: 'positional',
+      description: 'Review thread ID',
+    },
+  },
+  run: async (ctx) => {
+    const { threadId } = ctx.values
+
+    if (!threadId) {
+      console.error('Error: threadId is required')
+      process.exit(1)
+    }
+
+    const result = Bun.spawnSync([
+      'gh', 'api', 'graphql',
+      '-f', `query=${UNRESOLVE_MUTATION}`,
+      '-f', `threadId=${threadId}`,
+    ])
+
+    if (result.exitCode !== 0) {
+      console.error(new TextDecoder().decode(result.stderr).trim())
+      process.exit(1)
+    }
+
+    const response: UnresolveResponse = JSON.parse(new TextDecoder().decode(result.stdout))
+    const thread = response.data?.unresolveReviewThread?.thread
+    if (!thread) {
+      console.error('Failed to unresolve thread.')
+      process.exit(1)
+    }
+
+    console.log(`✓ Unresolved review thread ${thread.id}`)
+  },
+})
+
 const listCommand = define({
   name: 'list',
   description: 'List review comments on a pull request',
@@ -318,5 +379,6 @@ await cli(process.argv.slice(2), entryCommand, {
     list: listCommand,
     reply: replyCommand,
     resolve: resolveCommand,
+    unresolve: unresolveCommand,
   },
 })
