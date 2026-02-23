@@ -16,7 +16,7 @@ jobs:
       - name: Check for changeset file
         run: |
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
-          CHANGESET_FILES=$(echo "$CHANGED_FILES" | grep -E '^\.changeset/[^/]+\.md$' | grep -v 'README.md' || true)
+          CHANGESET_FILES=$(echo "$CHANGED_FILES" | grep -E '^\.changeset/[^/]+\.md$' | grep -v '^\.changeset/README\.md$' || true)
 
           if [ -z "$CHANGESET_FILES" ]; then
             echo "Error: No changeset file found. Please run 'bun changeset' and commit the generated file."
