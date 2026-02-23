@@ -387,11 +387,6 @@ const listCommand = define({
 
     const raw = new TextDecoder().decode(graphqlResult.stdout);
 
-    if (json) {
-      console.log(raw);
-      return;
-    }
-
     const response: GraphQLResponse = JSON.parse(raw);
     const pullRequest = response.data?.repository?.pullRequest;
     if (!pullRequest) {
@@ -399,11 +394,27 @@ const listCommand = define({
       process.exit(1);
     }
     const allThreads = pullRequest.reviewThreads.nodes;
-    const threads = resolved
-      ? allThreads.filter((t) => t.isResolved)
-      : unresolved
-        ? allThreads.filter((t) => !t.isResolved)
-        : allThreads;
+
+    let threads = allThreads;
+    if (resolved) {
+      threads = allThreads.filter((t) => t.isResolved);
+    } else if (unresolved) {
+      threads = allThreads.filter((t) => !t.isResolved);
+    }
+
+    if (json) {
+      const filteredResponse: GraphQLResponse = {
+        data: {
+          repository: {
+            pullRequest: {
+              reviewThreads: { nodes: threads },
+            },
+          },
+        },
+      };
+      console.log(JSON.stringify(filteredResponse));
+      return;
+    }
 
     if (threads.length === 0) {
       console.log("No review comments found.");
