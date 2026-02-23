@@ -57,6 +57,76 @@ type GraphQLResponse = {
   }
 }
 
+const REPLY_MUTATION = `
+  mutation($body: String!, $inReplyTo: ID!) {
+    addPullRequestReviewComment(input: {
+      inReplyTo: $inReplyTo
+      body: $body
+    }) {
+      comment {
+        id
+        url
+      }
+    }
+  }
+`
+
+type ReplyResponse = {
+  data: {
+    addPullRequestReviewComment: {
+      comment: {
+        id: string
+        url: string
+      }
+    } | null
+  }
+}
+
+const replyCommand = define({
+  name: 'reply',
+  description: 'Reply to a review comment',
+  args: {
+    commentId: {
+      type: 'positional',
+      description: 'Review comment ID',
+    },
+    body: {
+      type: 'string',
+      short: 'b',
+      description: 'Reply body text',
+    },
+  },
+  run: async (ctx) => {
+    const { commentId, body } = ctx.values
+
+    if (!body) {
+      console.error('Error: --body is required')
+      process.exit(1)
+    }
+
+    const result = Bun.spawnSync([
+      'gh', 'api', 'graphql',
+      '-f', `query=${REPLY_MUTATION}`,
+      '-f', `inReplyTo=${commentId}`,
+      '-f', `body=${body}`,
+    ])
+
+    if (result.exitCode !== 0) {
+      console.error(new TextDecoder().decode(result.stderr).trim())
+      process.exit(1)
+    }
+
+    const response: ReplyResponse = JSON.parse(new TextDecoder().decode(result.stdout))
+    const comment = response.data?.addPullRequestReviewComment?.comment
+    if (!comment) {
+      console.error('Failed to post reply.')
+      process.exit(1)
+    }
+
+    console.log(comment.url)
+  },
+})
+
 const listCommand = define({
   name: 'list',
   description: 'List review comments on a pull request',
@@ -166,5 +236,6 @@ await cli(process.argv.slice(2), entryCommand, {
   version: pkg.version,
   subCommands: {
     list: listCommand,
+    reply: replyCommand,
   },
 })
