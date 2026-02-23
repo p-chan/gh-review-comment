@@ -1,0 +1,27 @@
+name: Check Changeset
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check-changeset:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.pull_request.title, 'feat:') || startsWith(github.event.pull_request.title, 'fix:')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changeset file
+        run: |
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          CHANGESET_FILES=$(echo "$CHANGED_FILES" | grep -E '^\.changeset/[^/]+\.md$' | grep -v 'README.md' || true)
+
+          if [ -z "$CHANGESET_FILES" ]; then
+            echo "Error: No changeset file found. Please run 'bun changeset' and commit the generated file."
+            exit 1
+          fi
+
+          echo "Changeset file(s) found:"
+          echo "$CHANGESET_FILES"
