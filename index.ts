@@ -12,6 +12,7 @@ const REVIEW_THREADS_QUERY = `
             comments(first: 100) {
               nodes {
                 id
+                databaseId
                 body
                 path
                 line
@@ -32,6 +33,7 @@ const REVIEW_THREADS_QUERY = `
 
 type ReviewThreadComment = {
   id: string
+  databaseId: number
   body: string
   path: string
   line: number | null
@@ -57,29 +59,10 @@ type GraphQLResponse = {
   }
 }
 
-const REPLY_MUTATION = `
-  mutation($body: String!, $inReplyTo: ID!) {
-    addPullRequestReviewComment(input: {
-      inReplyTo: $inReplyTo
-      body: $body
-    }) {
-      comment {
-        id
-        url
-      }
-    }
-  }
-`
-
-type ReplyResponse = {
-  data: {
-    addPullRequestReviewComment: {
-      comment: {
-        id: string
-        url: string
-      }
-    } | null
-  }
+type RestReplyResponse = {
+  id: number
+  html_url: string
+  url: string
 }
 
 const RESOLVE_MUTATION = `
@@ -110,16 +93,25 @@ const replyCommand = define({
   args: {
     commentId: {
       type: 'positional',
-      description: 'Review comment ID',
+      description: 'Review comment database ID (numeric)',
     },
     body: {
       type: 'string',
       short: 'b',
       description: 'Reply body text',
     },
+    repo: {
+      type: 'string',
+      short: 'R',
+      description: 'Select another repository using the [HOST/]OWNER/REPO format',
+    },
+    pr: {
+      type: 'string',
+      description: 'Pull request number',
+    },
   },
   run: async (ctx) => {
-    const { commentId, body } = ctx.values
+    const { commentId, body, repo, pr } = ctx.values
 
     if (!commentId) {
       console.error('Error: commentId is required')
@@ -131,10 +123,38 @@ const replyCommand = define({
       process.exit(1)
     }
 
+    let repoFullName = repo
+    if (!repoFullName) {
+      const repoResult = Bun.spawnSync(['gh', 'repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'])
+      if (repoResult.exitCode !== 0) {
+        console.error(new TextDecoder().decode(repoResult.stderr).trim())
+        process.exit(1)
+      }
+      repoFullName = new TextDecoder().decode(repoResult.stdout).trim()
+    }
+
+    let prNumber = pr
+    if (!prNumber) {
+      const prResult = Bun.spawnSync(['gh', 'pr', 'view', '--json', 'number', '-q', '.number'])
+      if (prResult.exitCode !== 0) {
+        console.error(new TextDecoder().decode(prResult.stderr).trim())
+        process.exit(1)
+      }
+      prNumber = new TextDecoder().decode(prResult.stdout).trim()
+    }
+
+    const parts = repoFullName.split('/').filter(Boolean)
+    if (parts.length < 2) {
+      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO" or "HOST/OWNER/REPO".`)
+      process.exit(1)
+    }
+    const owner = parts[parts.length - 2]
+    const repoName = parts[parts.length - 1]
+
     const result = Bun.spawnSync([
-      'gh', 'api', 'graphql',
-      '-f', `query=${REPLY_MUTATION}`,
-      '-f', `inReplyTo=${commentId}`,
+      'gh', 'api',
+      '-X', 'POST',
+      `/repos/${owner}/${repoName}/pulls/${prNumber}/comments/${commentId}/replies`,
       '-f', `body=${body}`,
     ])
 
@@ -143,14 +163,8 @@ const replyCommand = define({
       process.exit(1)
     }
 
-    const response: ReplyResponse = JSON.parse(new TextDecoder().decode(result.stdout))
-    const comment = response.data?.addPullRequestReviewComment?.comment
-    if (!comment) {
-      console.error('Failed to post reply.')
-      process.exit(1)
-    }
-
-    console.log(`✓ Replied to comment ${comment.url}`)
+    const response: RestReplyResponse = JSON.parse(new TextDecoder().decode(result.stdout))
+    console.log(`✓ Replied to comment ${response.html_url}`)
   },
 })
 
@@ -281,7 +295,7 @@ const listCommand = define({
       for (const comment of thread.comments.nodes) {
         const line = comment.line ?? comment.originalLine
         const location = line ? `${comment.path}:${line}` : comment.path
-        console.log(`  [${comment.id}] ${location} — ${comment.author.login}`)
+        console.log(`  [${comment.databaseId}] ${location} — ${comment.author.login}`)
         console.log(`  ${comment.body}`)
         console.log(`  ${comment.url}`)
       }
