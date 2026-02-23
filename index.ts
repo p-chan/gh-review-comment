@@ -194,7 +194,7 @@ const resolveCommand = define({
   args: {
     threadId: {
       type: 'positional',
-      description: 'Review thread ID',
+      description: 'Review thread ID (starts with `PRRT_`)',
     },
   },
   run: async (ctx) => {
@@ -233,7 +233,7 @@ const unresolveCommand = define({
   args: {
     threadId: {
       type: 'positional',
-      description: 'Review thread ID',
+      description: 'Review thread ID (starts with `PRRT_`)',
     },
   },
   run: async (ctx) => {
@@ -281,7 +281,7 @@ const listCommand = define({
     },
     json: {
       type: 'boolean',
-      description: 'Output JSON',
+      description: 'Output raw JSON',
     },
   },
   run: async (ctx) => {
