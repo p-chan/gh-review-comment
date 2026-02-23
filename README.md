@@ -59,6 +59,8 @@ gh review-comment list [<pr>] [flags]
 | :------------- | :------------------------------------------------------ |
 | `-R`, `--repo` | Select another repository using the `OWNER/REPO` format |
 | `--json`       | Output raw JSON                                         |
+| `--resolved`   | Show only resolved threads                              |
+| `--unresolved` | Show only unresolved threads                            |
 
 ### `reply`
 
