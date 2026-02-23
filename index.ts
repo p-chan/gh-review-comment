@@ -125,7 +125,7 @@ const replyCommand = define({
     repo: {
       type: 'string',
       short: 'R',
-      description: 'Select another repository using the [HOST/]OWNER/REPO format',
+      description: 'Select another repository using the OWNER/REPO format',
     },
   },
   run: async (ctx) => {
@@ -153,7 +153,7 @@ const replyCommand = define({
 
     const parts = repoFullName.split('/').filter(Boolean)
     if (parts.length < 2) {
-      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO" or "HOST/OWNER/REPO".`)
+      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO".`)
       process.exit(1)
     }
     const owner = parts[parts.length - 2]
@@ -277,7 +277,7 @@ const listCommand = define({
     repo: {
       type: 'string',
       short: 'R',
-      description: 'Select another repository using the [HOST/]OWNER/REPO format',
+      description: 'Select another repository using the OWNER/REPO format',
     },
     json: {
       type: 'boolean',
@@ -309,7 +309,7 @@ const listCommand = define({
 
     const parts = repoFullName.split('/').filter(Boolean)
     if (parts.length < 2) {
-      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO" or "HOST/OWNER/REPO".`)
+      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO".`)
       process.exit(1)
     }
     const owner = parts[parts.length - 2]
