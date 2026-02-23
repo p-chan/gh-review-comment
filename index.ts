@@ -98,7 +98,11 @@ const listCommand = define({
       prNumber = new TextDecoder().decode(result.stdout).trim()
     }
 
-    const parts = repoFullName.split('/')
+    const parts = repoFullName.split('/').filter(Boolean)
+    if (parts.length < 2) {
+      console.error(`Invalid repository format "${repoFullName}". Expected "OWNER/REPO" or "HOST/OWNER/REPO".`)
+      process.exit(1)
+    }
     const owner = parts[parts.length - 2]
     const repoName = parts[parts.length - 1]
 
