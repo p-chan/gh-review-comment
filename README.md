@@ -2,7 +2,8 @@
 
 A [gh](https://cli.github.com/) extension for managing GitHub pull request review comments.
 
-## Motivation
+<details>
+<summary>Motivation</summary>
 
 The `gh` CLI does not provide built-in subcommands for managing pull request review comments. To reply to a comment or resolve a thread, you have to use `gh api` directly:
 
@@ -15,6 +16,8 @@ gh api graphql -f query='mutation { resolveReviewThread(...) { ... } }'
 ```
 
 This extension wraps these operations into simple commands.
+
+</details>
 
 ## Installation
 
