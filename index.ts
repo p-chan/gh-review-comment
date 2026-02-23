@@ -304,9 +304,22 @@ const listCommand = define({
       type: "boolean",
       description: "Output raw JSON",
     },
+    resolved: {
+      type: "boolean",
+      description: "Show only resolved threads",
+    },
+    unresolved: {
+      type: "boolean",
+      description: "Show only unresolved threads",
+    },
   },
   run: async (ctx) => {
-    const { pr, repo, json } = ctx.values;
+    const { pr, repo, json, resolved, unresolved } = ctx.values;
+
+    if (resolved && unresolved) {
+      console.error("Error: --resolved and --unresolved cannot be used together");
+      process.exit(1);
+    }
 
     let repoFullName = repo;
     if (!repoFullName) {
@@ -374,18 +387,34 @@ const listCommand = define({
 
     const raw = new TextDecoder().decode(graphqlResult.stdout);
 
-    if (json) {
-      console.log(raw);
-      return;
-    }
-
     const response: GraphQLResponse = JSON.parse(raw);
     const pullRequest = response.data?.repository?.pullRequest;
     if (!pullRequest) {
       console.error(`Pull request #${prNumber} not found in ${repoFullName}.`);
       process.exit(1);
     }
-    const threads = pullRequest.reviewThreads.nodes;
+    const allThreads = pullRequest.reviewThreads.nodes;
+
+    let threads = allThreads;
+    if (resolved) {
+      threads = allThreads.filter((t) => t.isResolved);
+    } else if (unresolved) {
+      threads = allThreads.filter((t) => !t.isResolved);
+    }
+
+    if (json) {
+      const filteredResponse: GraphQLResponse = {
+        data: {
+          repository: {
+            pullRequest: {
+              reviewThreads: { nodes: threads },
+            },
+          },
+        },
+      };
+      console.log(JSON.stringify(filteredResponse));
+      return;
+    }
 
     if (threads.length === 0) {
       console.log("No review comments found.");
