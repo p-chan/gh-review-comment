@@ -52,8 +52,8 @@ type GraphQLResponse = {
     repository: {
       pullRequest: {
         reviewThreads: { nodes: ReviewThread[] }
-      }
-    }
+      } | null
+    } | null
   }
 }
 
@@ -126,7 +126,12 @@ const listCommand = define({
     }
 
     const response: GraphQLResponse = JSON.parse(raw)
-    const threads = response.data.repository.pullRequest.reviewThreads.nodes
+    const pullRequest = response.data?.repository?.pullRequest
+    if (!pullRequest) {
+      console.error(`Pull request #${prNumber} not found in ${repoFullName}.`)
+      process.exit(1)
+    }
+    const threads = pullRequest.reviewThreads.nodes
 
     if (threads.length === 0) {
       console.log('No review comments found.')
