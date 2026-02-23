@@ -1,5 +1,11 @@
 # gh-review-comment
 
+## 0.2.0
+
+### Minor Changes
+
+- eefddc2: Add `--resolved` and `--unresolved` flags to the `list` subcommand to filter review threads by their resolution status.
+
 ## 0.1.0
 
 ### Minor Changes
