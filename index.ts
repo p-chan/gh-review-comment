@@ -291,8 +291,11 @@ const listCommand = define({
   name: "list",
   description: "List review comments on a pull request",
   args: {
+    // TODO: Remove `multiple: true` once gunshi supports optional positional args.
+    // https://github.com/kazupon/gunshi/issues/251
     pr: {
       type: "positional",
+      multiple: true,
       description: "Pull request number",
     },
     repo: {
@@ -314,7 +317,8 @@ const listCommand = define({
     },
   },
   run: async (ctx) => {
-    const { pr, repo, json, resolved, unresolved } = ctx.values;
+    const { pr: prValues, repo, json, resolved, unresolved } = ctx.values;
+    const pr = prValues?.[0];
 
     if (resolved && unresolved) {
       console.error("Error: --resolved and --unresolved cannot be used together");
