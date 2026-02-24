@@ -318,6 +318,12 @@ const listCommand = define({
   },
   run: async (ctx) => {
     const { pr: prValues, repo, json, resolved, unresolved } = ctx.values;
+
+    if (Array.isArray(prValues) && prValues.length > 1) {
+      console.error("Error: Only a single pull request number can be specified");
+      process.exit(1);
+    }
+
     const pr = prValues?.[0];
 
     if (resolved && unresolved) {
