@@ -1,5 +1,11 @@
 # gh-review-comment
 
+## 0.2.1
+
+### Patch Changes
+
+- 856b270: Make the `pr` positional arg in the `list` subcommand optional.
+
 ## 0.2.0
 
 ### Minor Changes
