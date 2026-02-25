@@ -1,5 +1,11 @@
 # gh-review-comment
 
+## 0.2.2
+
+### Patch Changes
+
+- d6daaa4: Fix PR auto-detection in `list` subcommand failing with "argument required when using the --repo flag".
+
 ## 0.2.1
 
 ### Patch Changes
