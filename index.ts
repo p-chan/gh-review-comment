@@ -355,8 +355,6 @@ const listCommand = define({
         "gh",
         "pr",
         "view",
-        "--repo",
-        repoFullName,
         "--json",
         "number",
         "-q",
