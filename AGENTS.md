@@ -19,6 +19,7 @@
 - CLI framework: **Gunshi**
 - Language: **TypeScript**
 - Formatter: **oxfmt**
+- Linter: **oxlint**
 
 ## Project Structure
 
@@ -33,6 +34,8 @@ bun run dev        # run locally
 bun run build      # compile to dist/gh-review-comment
 bun run fmt        # format code
 bun run fmt:check  # check formatting
+bun run lint       # lint code
+bun run lint:fix   # lint and auto-fix
 ```
 
 ## CLI Development
@@ -52,4 +55,5 @@ Verify the following commands succeed:
 ```bash
 bun run build
 bun run fmt:check
+bun run lint
 ```
