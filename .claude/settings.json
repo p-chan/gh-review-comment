@@ -4,7 +4,9 @@
       "Bash(bun run dev)",
       "Bash(bun run build)",
       "Bash(bun run fmt)",
-      "Bash(bun run fmt:check)"
+      "Bash(bun run fmt:check)",
+      "Bash(bun run lint)",
+      "Bash(bun run lint:fix)"
     ]
   }
 }
