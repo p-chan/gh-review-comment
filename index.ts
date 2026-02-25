@@ -351,15 +351,7 @@ const listCommand = define({
 
     let prNumber = pr;
     if (!prNumber) {
-      const prResult = Bun.spawnSync([
-        "gh",
-        "pr",
-        "view",
-        "--json",
-        "number",
-        "-q",
-        ".number",
-      ]);
+      const prResult = Bun.spawnSync(["gh", "pr", "view", "--json", "number", "-q", ".number"]);
       if (prResult.exitCode !== 0) {
         console.error(new TextDecoder().decode(prResult.stderr).trim());
         process.exit(1);
