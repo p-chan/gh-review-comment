@@ -181,15 +181,18 @@ const replyCommand = define({
     const pullRequestUrl = new TextDecoder().decode(commentResult.stdout).trim();
     const prNumber = pullRequestUrl.split("/").pop();
 
-    const result = Bun.spawnSync([
-      "gh",
-      "api",
-      "-X",
-      "POST",
-      `/repos/${owner}/${repoName}/pulls/${prNumber}/comments/${commentId}/replies`,
-      "-f",
-      `body=${body}`,
-    ]);
+    const result = Bun.spawnSync(
+      [
+        "gh",
+        "api",
+        "-X",
+        "POST",
+        `/repos/${owner}/${repoName}/pulls/${prNumber}/comments/${commentId}/replies`,
+        "--input",
+        "-",
+      ],
+      { stdin: JSON.stringify({ body }) },
+    );
 
     if (result.exitCode !== 0) {
       console.error(new TextDecoder().decode(result.stderr).trim());
