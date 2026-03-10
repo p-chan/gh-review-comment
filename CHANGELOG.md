@@ -1,5 +1,11 @@
 # gh-review-comment
 
+## 0.3.0
+
+### Minor Changes
+
+- 32c22f6: Add `--body-file` option to `reply` subcommand; accepts a file path or `-` for stdin
+
 ## 0.2.2
 
 ### Patch Changes
