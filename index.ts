@@ -122,6 +122,10 @@ const replyCommand = define({
       short: "b",
       description: "Reply body text",
     },
+    bodyFile: {
+      type: "string",
+      description: "Read reply body from file (use '-' for stdin)",
+    },
     repo: {
       type: "string",
       short: "R",
@@ -129,15 +133,34 @@ const replyCommand = define({
     },
   },
   run: async (ctx) => {
-    const { commentId, body, repo } = ctx.values;
+    const { commentId, body, bodyFile, repo } = ctx.values;
 
     if (!commentId) {
       console.error("Error: commentId is required");
       process.exit(1);
     }
 
-    if (!body) {
-      console.error("Error: --body is required");
+    if (body && bodyFile) {
+      console.error("Error: --body and --body-file cannot be used together");
+      process.exit(1);
+    }
+
+    let resolvedBody: string;
+    if (bodyFile) {
+      if (bodyFile === "-") {
+        resolvedBody = await Bun.stdin.text();
+      } else {
+        const file = Bun.file(bodyFile);
+        if (!(await file.exists())) {
+          console.error(`Error: file not found: ${bodyFile}`);
+          process.exit(1);
+        }
+        resolvedBody = await file.text();
+      }
+    } else if (body) {
+      resolvedBody = body;
+    } else {
+      console.error("Error: --body or --body-file is required");
       process.exit(1);
     }
 
@@ -188,7 +211,7 @@ const replyCommand = define({
       "POST",
       `/repos/${owner}/${repoName}/pulls/${prNumber}/comments/${commentId}/replies`,
       "-f",
-      `body=${body}`,
+      `body=${resolvedBody}`,
     ]);
 
     if (result.exitCode !== 0) {
