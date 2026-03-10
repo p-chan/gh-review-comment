@@ -81,10 +81,11 @@ gh review-comment reply <commentId> [flags]
 
 **Flags**
 
-| Flag           | Description                                             |
-| :------------- | :------------------------------------------------------ |
-| `-b`, `--body` | Reply body text (required)                              |
-| `-R`, `--repo` | Select another repository using the `OWNER/REPO` format |
+| Flag           | Description                                                                     |
+| :------------- | :------------------------------------------------------------------------------ |
+| `-b`, `--body` | Reply body text                                                                 |
+| `--body-file`  | Read reply body from file (use `-` for stdin); mutually exclusive with `--body` |
+| `-R`, `--repo` | Select another repository using the `OWNER/REPO` format                         |
 
 ### `resolve`
 
