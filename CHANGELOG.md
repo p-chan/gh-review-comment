@@ -1,5 +1,11 @@
 # gh-review-comment
 
+## 0.3.1
+
+### Patch Changes
+
+- ce79742: Fix option values containing `--` (e.g. CSS custom properties) being misidentified as flags by updating gunshi to 0.29.3
+
 ## 0.3.0
 
 ### Minor Changes
